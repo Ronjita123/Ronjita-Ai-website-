@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FocusFlow Pro - Unified Productivity Suite</title>
     <!-- Tailwind CSS CDN -->
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -26,9 +26,9 @@
         }
     </script>
     <!-- Lucide Icons CDN -->
-    <script src="[https://unpkg.com/lucide@latest/dist/umd/lucide.js](https://unpkg.com/lucide@latest/dist/umd/lucide.js)"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -53,7 +53,7 @@
                     <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400">PRO SUITE</span>
                 </div>
             </div>
-            <button id="themeToggleBtn" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <button id="themeToggleBtn" onclick="ToggleTheme()" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                 <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
                 <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
             </button>
@@ -111,7 +111,7 @@
                 <button onclick="ModalManager.openQuickAdd()" class="p-2 rounded-lg bg-indigo-600 text-white">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                 </button>
-                <button id="themeToggleBtnMobile" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                <button id="themeToggleBtnMobile" onclick="ToggleTheme()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
                     <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
                     <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
                 </button>
@@ -154,7 +154,7 @@
 
     <!-- Floating AI Widget -->
     <div id="aiFloatingWidget" class="fixed bottom-16 md:bottom-6 right-6 z-30 flex flex-col items-end">
-        <div id="aiPopup" class="hidden mb-4 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-200 transform scale-95 origin-bottom-right">
+        <div id="aiPopup" class="hidden mb-4 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-200">
             <div class="p-3 bg-indigo-600 text-white flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
@@ -212,9 +212,6 @@
             ],
             notes: [
                 { id: 'note-1', title: 'Architecture Refactoring Ideas', content: 'Consider adopting a lightweight pub/sub model for frontend state management.', tags: ['engineering', 'ideas'], updatedAt: new Date().toISOString() }
-            ],
-            chatHistory: [
-                { id: 'msg-1', sender: 'ai', text: 'Hello! I am your FocusFlow AI assistant. How can I help you manage your productivity today?', timestamp: new Date().toISOString() }
             ]
         };
 
@@ -229,7 +226,7 @@
                     const saved = localStorage.getItem(STORAGE_KEY);
                     if (saved) return JSON.parse(saved);
                 } catch (e) {
-                    console.error('Failed to load state from localStorage:', e);
+                    console.error('Failed to load state:', e);
                 }
                 return JSON.parse(JSON.stringify(DefaultSeed));
             }
@@ -245,9 +242,7 @@
 
             subscribe(listener) {
                 this.listeners.push(listener);
-                return () => {
-                    this.listeners = this.listeners.filter(l => l !== listener);
-                };
+                return () => { this.listeners = this.listeners.filter(l => l !== listener); };
             }
 
             notify() {
@@ -261,8 +256,6 @@
                     priority: task.priority || 'medium',
                     completed: false,
                     dueDate: task.dueDate || new Date().toISOString().split('T')[0],
-                    estimatedPomodoros: parseInt(task.estimatedPomodoros) || 2,
-                    completedPomodoros: 0,
                     createdAt: new Date().toISOString()
                 };
                 this.state.tasks.unshift(newTask);
@@ -285,41 +278,6 @@
                 this.saveState();
                 Toast.show('Task deleted', 'info');
             }
-
-            addEvent(evt) {
-                const newEvent = {
-                    id: 'event-' + Date.now(),
-                    title: evt.title,
-                    date: evt.date || new Date().toISOString().split('T')[0],
-                    time: evt.time || '10:00',
-                    duration: evt.duration || '30m',
-                    category: evt.category || 'general'
-                };
-                this.state.events.push(newEvent);
-                this.saveState();
-                Toast.show(`Event scheduled: "${newEvent.title}"`, 'success');
-                return newEvent;
-            }
-
-            addNote(note) {
-                const newNote = {
-                    id: 'note-' + Date.now(),
-                    title: note.title,
-                    content: note.content || '',
-                    tags: note.tags || [],
-                    updatedAt: new Date().toISOString()
-                };
-                this.state.notes.unshift(newNote);
-                this.saveState();
-                Toast.show(`Note created: "${newNote.title}"`, 'success');
-                return newNote;
-            }
-
-            deleteNote(id) {
-                this.state.notes = this.state.notes.filter(n => n.id !== id);
-                this.saveState();
-                Toast.show('Note deleted', 'info');
-            }
         }
 
         const AppStore = new StateManager();
@@ -333,10 +291,43 @@
                 toast.innerHTML = `<span>${message}</span>`;
                 container.appendChild(toast);
 
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-2', 'opacity-0');
-                }, 10);
-
+                setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
                 setTimeout(() => {
                     toast.classList.add('opacity-0', 'translate-y-2');
-           
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        const Navigation = {
+            activeView: 'dashboard',
+            navigate(view) {
+                this.activeView = view;
+                this.updateActiveStyles();
+                this.render();
+            },
+            updateActiveStyles() {
+                document.querySelectorAll('[data-nav]').forEach(el => {
+                    const isActive = el.getAttribute('data-nav') === this.activeView;
+                    if (isActive) {
+                        el.className = 'nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400';
+                    } else {
+                        el.className = 'nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/50';
+                    }
+                });
+            },
+            render() {
+                const container = document.getElementById('viewContainer');
+                const state = AppStore.state;
+                let html = '';
+
+                if (this.activeView === 'dashboard') {
+                    html = `
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-bold">Dashboard</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <h3 class="text-sm font-medium text-slate-500">Total Tasks</h3>
+                                    <p class="text-3xl font-bold mt-2">${state.tasks.length}</p>
+                                </div>
+              
